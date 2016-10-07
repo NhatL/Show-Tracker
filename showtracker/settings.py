@@ -23,8 +23,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'ig7vk6t$wk2+37g$=%+)u12u6yhl(12aiyb@*!(l6%bg+5n&ko'
 
 # The movie DB API keys
-API_KEY_V3 = 'fe03f1193a8983347287c85fff35c0af'
-API_READ_ACCESS_TOKEN_V4 = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmZTAzZjExOTNhODk4MzM0NzI4N2M4NWZmZjM1YzBhZiIsInN1YiI6IjU3ZjY0ZWE3OTI1MTQxMzYwZDAwNjI2ZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.3G6r-G2V31HEALCT8CyLmzj0eS-TQarH2qJ22P-HSoM'
+MOVIE_DB_ROOT_API_URL = 'https://api.themoviedb.org/3'
+MOVIE_DB_API_KEY = 'fe03f1193a8983347287c85fff35c0af'
+MOVIE_DB_API_LIMIT_PER_SECOND = 3
+# API_READ_ACCESS_TOKEN_V4 = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmZTAzZjExOTNhODk4MzM0NzI4N2M4NWZmZjM1YzBhZiIsInN1YiI6IjU3ZjY0ZWE3OTI1MTQxMzYwZDAwNjI2ZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.3G6r-G2V31HEALCT8CyLmzj0eS-TQarH2qJ22P-HSoM'
+
+# TVDB API key
+# API_KEY = '3EE494AC7AEAF2AB'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -42,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'shows',
+    'website',
 ]
 
 MIDDLEWARE = [
