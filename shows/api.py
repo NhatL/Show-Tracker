@@ -1,9 +1,13 @@
 # themoviedb API endpoints
 
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
+
 from django.conf import settings
 
-import requests, urlparse, os, time, json
+import requests
+import os
+import time
+import json
 
 
 api_key = settings.MOVIE_DB_API_KEY
@@ -32,13 +36,13 @@ TV_URLS = {
 
 
 TV_SEASON_URLS = {
-    'detail': 'tv/%(tv_id)s/season/%(season_number)s',
+    'details': 'tv/%(tv_id)s/season/%(season_number)s',
     'changes': 'tv/season/{season_id}/changes',
-    'account_states': 'tv/%(tv_id)s/season/%(season_number)s/account_states',
-    'credits': 'tv/%(tv_id)s/season/%(season_number)s/credits',
-    'external_ids': 'tv/%(tv_id)s/season/%(season_number)s/external_ids',
-    'images': 'tv/%(tv_id)s/season/%(season_number)s/images',
-    'videos': 'tv/%(tv_id)s/season/%(season_number)s/videos',
+    'account_states': 'tv/%(tv_id)s/season/%(season_id)s/account_states',
+    'credits': 'tv/%(tv_id)s/season/%(season_id)s/credits',
+    'external_ids': 'tv/%(tv_id)s/season/%(season_id)s/external_ids',
+    'images': 'tv/%(tv_id)s/season/%(season_id)s/images',
+    'videos': 'tv/%(tv_id)s/season/%(season_id)s/videos',
 }
 
 
@@ -53,25 +57,6 @@ GENRE_URLS = {
 }
 
 
-def rate_limit(max_per_second):
-    min_interval = 1.0 / float(max_per_second)
-
-    def decorate(func):
-        last_time_called = [0.0]
-
-        def rate_limited_function(*args,**kargs):
-            elapsed = time.clock() - last_time_called[0]
-            leftToWait = min_interval - elapsed
-            if leftToWait>0:
-                time.sleep(leftToWait)
-            ret = func(*args,**kargs)
-            last_time_called[0] = time.clock()
-            return ret
-        return rate_limited_function
-    return decorate
-
-
-@rate_limit(api_limit_per_second)
 def discover(type='tv', **kwargs):
     args = {
         'api_key': api_key,
@@ -84,18 +69,44 @@ def discover(type='tv', **kwargs):
                 args[proper_key] = proper_val
         else:
             args[key] = val
-    request_url = os.path.join(root_api_url, DISCOVER_URLS[type])
+    request_url = os.path.join(root_api_url, DISCOVER_URLS[type]).replace('\\', '/')
     request_return = json.loads(requests.get(request_url, args).text)
+    time.sleep(0.3)
     return request_return['results'] if 'results' in request_return else ''
 
 
-@rate_limit(api_limit_per_second)
 def genres(type='tv', language='en-US'):
+    # Return list of all genres
     args = {
         'api_key': api_key,
         'language': language,
     }
-    request_url = os.path.join(root_api_url, GENRE_URLS[type])
+    request_url = os.path.join(root_api_url, GENRE_URLS[type]).replace('\\', '/')
     request_get = requests.get(request_url, args)
     request_return = json.loads(request_get.text)
-    return request_return['genres'] if 'genres' in request_return else ''
+    time.sleep(0.3)
+    return request_return['genres'] if 'genres' in request_return else []
+
+
+def get_seasons(id=1399):
+    # Return seasons list by TV series ID
+    args = {
+        'api_key': api_key,
+    }
+    request_url = os.path.join(root_api_url, TV_URLS['details'] % ({'tv_id': id})).replace('\\', '/')
+    request_get = requests.get(request_url, args)
+    request_return = json.loads(request_get.text)
+    time.sleep(0.3)
+    return request_return['seasons'] if 'seasons' in request_return else []
+
+
+def get_season_episodes(tv_id, season_number):
+    # Return season detail by TV Show ID and Season number
+    args = {
+        'api_key': api_key,
+    }
+    request_url = os.path.join(root_api_url, TV_SEASON_URLS['details'] % ({'tv_id': tv_id, 'season_number': season_number})).replace('\\', '/')
+    request_get = requests.get(request_url, args)
+    request_return = json.loads(request_get.text)
+    time.sleep(0.3)
+    return request_return['episodes'] if 'episodes' in request_return else []

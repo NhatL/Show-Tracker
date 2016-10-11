@@ -5,20 +5,35 @@ from models import *
 
 class GenreInline(admin.TabularInline):
     model = Genre.show.through
+    extra = 0
+
+
+class SeasonInline(admin.TabularInline):
+    model = Season
+    readonly_fields = ('movie_db_id', )
+    exclude = ('description', )
+    extra = 0
+
+
+class EpisodeInline(admin.TabularInline):
+    model = Episode
+    readonly_fields = ('movie_db_id', )
+    exclude = ('description', )
+    extra = 0
 
 
 class ShowAdmin(admin.ModelAdmin):
-    inline = (GenreInline, )
-    list_display = ('name', 'ongoing', )
+    inlines = [GenreInline, SeasonInline]
+    list_display = ('name', 'ongoing', 'popularity', )
 
 
 class SeasonAdmin(admin.ModelAdmin):
+    inlines = [EpisodeInline]
     list_display = ('show', 'number', )
 
 
 class EpisodeAdmin(admin.ModelAdmin):
-    list_display = ('number', 'season', 'title', )
-
+    list_display = ('number', 'season', 'title', 'air_date', )
 
 
 class GenreAdmin(admin.ModelAdmin):
