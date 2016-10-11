@@ -1,10 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>WEBSITE INDEX</title>
-</head>
-<body>
-WEBSITE INDEX
-</body>
-</html>
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block content %}
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1>Show tracker</h1>
+                    <p>Tracking your shows</p>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extrascripts %}
+{% endblock %}

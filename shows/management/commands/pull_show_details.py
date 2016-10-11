@@ -48,4 +48,3 @@ class Command(BaseCommand):
                             episode['air_date'] = datetime.datetime.now().strftime("%Y-%m-%d")
                         new_episode.air_date = datetime.datetime.strptime(episode.get('air_date', datetime.datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d")
                         new_episode.save()
-
