@@ -131,3 +131,5 @@ USE_L10N = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = 'static/'
+
+DOWNLOAD_PAGINATOR = 20

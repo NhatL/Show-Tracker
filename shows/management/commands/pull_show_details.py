@@ -14,6 +14,7 @@ class Command(BaseCommand):
             print "----------- Current index: " + str(i)
             result = discover(page=i)
             for show in result:
+                episode_count = 0
                 if isinstance(show['name'], unicode):
                     print show['name'].encode('windows-1252', 'ignore')
                 else:
@@ -48,3 +49,6 @@ class Command(BaseCommand):
                             episode['air_date'] = datetime.datetime.now().strftime("%Y-%m-%d")
                         new_episode.air_date = datetime.datetime.strptime(episode.get('air_date', datetime.datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d")
                         new_episode.save()
+                        episode_count += 1
+                new_show.episode_count = episode_count
+                new_show.save()

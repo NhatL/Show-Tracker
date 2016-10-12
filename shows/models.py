@@ -11,6 +11,7 @@ class Show(models.Model):
     ongoing = models.BooleanField(default=True)
     movie_db_id = models.IntegerField(default=1, null=True, blank=True)
     users = models.ManyToManyField(User)
+    episode_count = models.IntegerField(null=True, blank=True, default=1)
     last_updated = models.DateField(null=True, blank=True)
 
     def __unicode__(self):
