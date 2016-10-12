@@ -28,7 +28,7 @@
 
     <body class="main-body">
         <div id="wrapper">
-        <a id="menu-toggle" href="#" class="btn btn-dark btn-lg toggle"><i class="fa fa-bars"></i></a>
+            <a id="menu-toggle" href="#" class="btn btn-dark btn-lg toggle"><i class="fa fa-bars"></i></a>
             <nav id="sidebar-wrapper">
                 <ul class="sidebar-nav">
                     <li class="sidebar-brand">
@@ -38,7 +38,7 @@
                         <div id="search-shows">
                             <form action="/shows/browse" method="get" accept-charset="UTF-8" id="search-form">
                                 <div class="input-group col-sm-12">
-                                    <input type="input" class="form-control input-sm" placeholder="Search" name="search" />
+                                    <input type="input" class="form-control input-sm" placeholder="Search" name="name" />
                                     <span class="input-group-btn">
                                         <button class="btn btn-info btn-sm" type="button">
                                             <i class="glyphicon glyphicon-search"></i>
@@ -80,9 +80,9 @@
                 </ul>
             </nav>
 
-            <div id="page-content-wrapper">
+            <nav id="page-content-wrapper">
                 {% block content %}{% endblock %}
-            </div>
+            </nav>
         </div>
     </body>
 

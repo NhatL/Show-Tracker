@@ -1,9 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
 from django.forms.models import model_to_dict
 from django.core.exceptions import ObjectDoesNotExist
+from django.urls import reverse
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 from shows.models import Show, Genre
 
@@ -25,9 +30,7 @@ def show_details(request, id):
     try:
         show = Show.objects.get(movie_db_id=id)
     except ObjectDoesNotExist:
-        args = {
-            'error': 'Does not exist',
-        }
+        return redirect(reverse('browse-view'))
     else:
         args = {
             'name': show.name,
@@ -35,6 +38,8 @@ def show_details(request, id):
             'description': show.description,
             'ongoing': show.ongoing,
             'episode_count': show.episode_count,
+            'vote_average': show.vote_average,
+            'vote_count': show.vote_count,
             'seasons': [],
         }
         for season in show.season_set.all().order_by('number'):
@@ -87,7 +92,7 @@ def browse(request):
             if request.GET['showAge'] == 'lessthan1':
                 search_query = search_query & Q(first_air__gte=datetime.datetime.now() - datetime.timedelta(days=365))
 
-        results = Show.objects.filter(search_query).values('movie_db_id', 'name', 'popularity', 'description', 'episode_count', 'ongoing')
+        results = Show.objects.filter(search_query).values('movie_db_id', 'name', 'popularity', 'description', 'episode_count', 'ongoing', 'vote_average', 'vote_count')
 
         paginator = Paginator(results, settings.DOWNLOAD_PAGINATOR)
         page = request.GET.get('page')
@@ -109,17 +114,92 @@ def unwatched(request):
 
 def my_shows(request):
     print "mine"
-    return render(request, "website/index.html")
+    print request.user.show_set.all()
+    return render(request, "website/my_shows.html")
 
 
-def login(request):
+def login_user(request):
     print "login"
-    return render(request, "website/index.html")
+
+    if request.user.is_authenticated():
+        return redirect(reverse('main-view'))
+
+    if request.POST:
+        email = request.POST['email']
+        password = request.POST['password']
+
+        try:
+            validate_email(email)
+        except:
+            return render(request, "website/login.html", {'error': "Bad email.", 'email': email, 'password': password})
+        else:
+            pass
+
+        wanted_user = User.objects.filter(email=email)
+        if len(wanted_user) > 1:
+            return redirect(reverse('login-view'))
+        if len(wanted_user) < 1:
+            return render(request, "website/login.html", {'error': "Email doesn't exist.", 'email': email, 'password': password})
+
+        wanted_user = wanted_user[0]
+        user = authenticate(username=wanted_user.username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return redirect(reverse('main-view'))
+        else:
+            return render(request, "website/login.html", {'error': "Wrong password.", 'email': email, 'password': password})
+    return render(request, "website/login.html")
 
 
 def signup(request):
     print "signup"
-    return render(request, "website/index.html")
+    if request.user.is_authenticated():
+        return redirect(reverse('main-view'))
+
+    if request.POST:
+        email = request.POST['email']
+        password = request.POST['password']
+        password_confirm = request.POST['password_confirm']
+
+        if password != password_confirm:
+            return render(request, "website/signup.html", {
+                'error': "Passwords doesn't match.",
+                'email': email,
+                'password': password,
+                'password_confirm': password_confirm
+            })
+
+        try:
+            validate_email(email)
+        except:
+            return render(request, "website/signup.html", {
+                'error': "Bad email.",
+                'email': email,
+                'password': password,
+                'password_confirm': password_confirm
+            })
+        else:
+            pass
+
+        checked_users = User.objects.filter(email=email)
+        if len(checked_users) > 0:
+            return render(request, "website/signup.html", {
+                'error': "Email already exists.",
+                'email': email,
+                'password': password,
+                'password_confirm': password_confirm
+            })
+
+        user = User.objects.create_user(email, email, password)
+        user.save()
+
+        user = authenticate(username=email, password=password)
+        if user.is_active:
+            login(request, user)
+            return redirect(reverse('main-view'))
+
+    return render(request, "website/signup.html")
 
 
 def profile(request):
@@ -127,6 +207,6 @@ def profile(request):
     return render(request, "website/index.html")
 
 
-def logout(request):
-    print "logout"
-    return render(request, "website/index.html")
+def reset(request):
+    print "reset"
+    return render(request, "website/reset.html")

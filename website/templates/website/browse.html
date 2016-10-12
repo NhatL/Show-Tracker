@@ -100,12 +100,18 @@
                                     Popularity
                                 </td>
                                 <td align="left" width="5%">
+                                    Vote Average
+                                </td>
+                                <td align="left" width="5%">
+                                    Vote Count
+                                </td>
+                                <td align="left" width="5%">
                                     Episodes
                                 </td>
                                 <td align="left" width="5%">
                                     Ongoing
                                 </td>
-                                <td align="left" width="80%">
+                                <td align="left" width="50%">
                                     Description
                                 </td>
                             </tr>
@@ -118,6 +124,12 @@
                                     </td>
                                     <td>
                                         {{ show.popularity }}
+                                    </td>
+                                    <td>
+                                        {{ show.vote_average }}
+                                    </td>
+                                    <td>
+                                        {{ show.vote_count }}
                                     </td>
                                     <td>
                                         {{ show.episode_count }}
@@ -133,8 +145,13 @@
                         </tbody>
                     </table>
                 {% else %}
-                    </br></br>
-                    <h1 align="center" style="font-weight: bold;">Use the filters on the left to find shows.</h1>
+                    {% if name != '' or genre != 'any' or status != 'any' or showAge != 'any' %}
+                        </br></br>
+                        <h1 align="center" style="font-weight: bold;">No show was found.</h1>
+                    {% else %}
+                        </br></br>
+                        <h1 align="center" style="font-weight: bold;">Use the filters on the left to find shows.</h1>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>

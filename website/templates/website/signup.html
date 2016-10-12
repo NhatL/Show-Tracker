@@ -1,0 +1,39 @@
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-5"></div>
+        <div class="col-lg-2">
+            <h1 align="center">Sign up</h1><br>
+            <hr class="colorgraph"><br>
+            <form action="{% url 'signup-view' %}" method="post" name="Signup_Form" class="form-signup pure-form">
+                {% csrf_token %}
+
+                <label for="email">Email:</label>
+                <input type="text" class="form-control" id="email" name="email" placeholder="Email" required="" autofocus=""
+                {% if email %}value="{{ email }}"{% endif %}/><br>
+
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required
+                {% if password %}value="{{ password }}"{% endif %}/><br>
+
+                <label for="password_confirm">Password Confirmation:</label>
+                <input type="password" class="form-control" id="password_confirm" name="password_confirm" placeholder="Confirm Password" required
+                {% if password_confirm %}value="{{ password_confirm }}"{% endif %}/>
+
+                {% if error %}<h5 style="color:red;">{{ error }}</h5>{% endif %}
+                <br>
+
+                <button class="btn btn-sm btn-primary btn-block"  name="Submit" value="Submit" type="Submit">Sign Up</button>
+            </form>
+            <br>
+            <a href="{% url 'login-view' %}" class="btn btn-sm btn-primary btn-block">Login</a>
+        </div>
+        <div class="col-lg-4"></div>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/signup.css' %}" type="text/css" />
+{% endblock %}

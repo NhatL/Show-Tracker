@@ -11,7 +11,7 @@ class GenreInline(admin.TabularInline):
 class SeasonInline(admin.TabularInline):
     model = Season
     readonly_fields = ('number', 'movie_db_id', )
-    exclude = ('description', )
+    exclude = ('description', 'server_img_path', 'local_img_path', )
     extra = 0
 
 
@@ -24,7 +24,7 @@ class EpisodeInline(admin.TabularInline):
 
 class ShowAdmin(admin.ModelAdmin):
     inlines = [GenreInline, SeasonInline]
-    list_display = ('name', 'ongoing', 'popularity', )
+    list_display = ('name', 'ongoing', 'popularity', 'episode_count', )
 
 
 class SeasonAdmin(admin.ModelAdmin):
