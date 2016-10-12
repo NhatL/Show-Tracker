@@ -22,8 +22,10 @@ class Command(BaseCommand):
                 new_show = Show.objects.get_or_create(movie_db_id=show['id'])[0]
                 new_show.name = show['name']
                 new_show.description = show.get('overview', '')
-                new_show.popularity = show.get('popularity', 1)
+                new_show.popularity = "%0.2f" % (show.get('popularity', 1), )
                 new_show.genre_set = []
+                new_show.first_air = datetime.datetime.strptime(show.get('first_air_date', datetime.datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d")
+                new_show.last_updated = datetime.datetime.now().strftime("%Y-%m-%d")
                 for genre_id in show['genre_ids']:
                     try:
                         new_show.genre_set.add(Genre.objects.get(movie_db_id=genre_id))

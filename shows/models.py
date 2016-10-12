@@ -13,6 +13,7 @@ class Show(models.Model):
     users = models.ManyToManyField(User)
     episode_count = models.IntegerField(null=True, blank=True, default=1)
     last_updated = models.DateField(null=True, blank=True)
+    first_air = models.DateField(null=True, blank=True)
 
     def __unicode__(self):
         return unicode(self.name)

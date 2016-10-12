@@ -10,7 +10,7 @@ class GenreInline(admin.TabularInline):
 
 class SeasonInline(admin.TabularInline):
     model = Season
-    readonly_fields = ('movie_db_id', )
+    readonly_fields = ('number', 'movie_db_id', )
     exclude = ('description', )
     extra = 0
 

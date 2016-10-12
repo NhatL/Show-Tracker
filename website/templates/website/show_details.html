@@ -6,5 +6,109 @@
 {% endblock %}
 
 {% block content %}
-    Show details
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2"></div>
+            <div class="col-lg-6">
+                <h1>{{ name }}</h1>
+            </div>
+            <div class="col-lg-2">
+                <div class="well pull-right">
+                    <table class="table-responsive">
+                        <thead>
+                            <tr>
+                                <td width="33%" align="center">
+                                    <h4>Popularity</h4>
+                                </td>
+                                <td width="33%" align="center">
+                                    <h4>Ongoing</h4>
+                                </td>
+                                <td width="33%" align="center">
+                                    <h4>Episode Count</h4>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="warning">
+                                <td align="center">
+                                    <h5>{{ popularity }}</h5>
+                                </td>
+                                <td align="center">
+                                    <h5>{{ ongoing }}</h5>
+                                </td>
+                                <td align="center">
+                                    <h5>{{ episode_count }}</h5>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4"></div>
+                <ul class="nav nav-tabs col-lg-3" align="center" style="text-align:center;">
+                    <h4>Season</h4>
+                    {% for season in seasons %}
+                        <li{% if seasons.0 == season %} class="active"{% endif %}><a data-toggle="tab" href="#season{{ season.number }}"{% if seasons.0 == season %} aria-expanded="true"{% endif %}>{{ season.number }}</a></li>
+                    {% endfor %}
+                </ul>
+        </div>
+        <div class="row">
+            <div class="col-lg-1"></div>
+            <div class="col-lg-10">
+                <div class="tab-content">
+                {% for season in seasons %}
+                    <div id="season{{ season.number }}" class="tab-pane fade{% if seasons.0 == season %} in active{% endif %}">
+                        <h3>Season {{ season.number }}</h3>
+                        <table class="table table-responsive table-hover table-striped">
+                            <thead>
+                                <tr style="font-weight:bold;">
+                                    <td width="3%" align="center">
+                                        Episode
+                                    </td>
+                                    <td width="10%" align="center">
+                                        Title
+                                    </td>
+                                    <td width="5%" align="center">
+                                        Air Date
+                                    </td>
+                                    <td width="70%" align="center">
+                                        Description
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for episode in season.episodes %}
+                                    <tr>
+                                        <td style="font-weight:bold;">
+                                            {{ episode.number }}
+                                        </td>
+                                        <td style="font-weight:bold;">
+                                            {{ episode.title }}
+                                        </td>
+                                        <td>
+                                            {{ episode.air_date }}
+                                        </td>
+                                        <td>
+                                            {{ episode.description }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extrascripts %}
+    <script>
+        if (window.location.hash) {
+            $("a[href='" + window.location.hash + "']").tab('show');
+        }
+    </script>
 {% endblock %}
