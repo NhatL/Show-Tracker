@@ -43,6 +43,7 @@ class Command(BaseCommand):
                     else:
                         print "S%02d" % season.get('season_number', 1)
                     new_season = Season.objects.get_or_create(movie_db_id=season['id'], number=season.get('season_number', 1), show=new_show)[0]
+                    new_season.server_img_path = season.get('poster_path', '')
                     new_season.save()
 
                     episodes = get_season_episodes(tv_id=show['id'], season_number=season.get('season_number', 1))
@@ -53,6 +54,7 @@ class Command(BaseCommand):
                         if episode['air_date'] is None:
                             episode['air_date'] = datetime.datetime.now().strftime("%Y-%m-%d")
                         new_episode.air_date = datetime.datetime.strptime(episode.get('air_date', datetime.datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d")
+                        new_episode.server_img_path = episode.get('still_path', '')
                         new_episode.save()
                         episode_count += 1
                 new_show.episode_count = episode_count

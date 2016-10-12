@@ -28,6 +28,8 @@ class Season(models.Model):
     description = models.TextField(null=True, blank=True, default="")
     movie_db_id = models.IntegerField(default=1)
     show = models.ForeignKey("Show")
+    server_img_path = models.CharField(max_length=255, null=True, blank=True)
+    local_img_path = models.CharField(max_length=255, null=True, blank=True)
 
     def __unicode__(self):
         return unicode(self.show.name + ": S%02d" % (self.number, ))
@@ -40,6 +42,8 @@ class Episode(models.Model):
     season = models.ForeignKey("Season")
     description = models.TextField(null=True, blank=True, default="")
     movie_db_id = models.IntegerField(null=True, blank=True)
+    server_img_path = models.CharField(max_length=255, null=True, blank=True)
+    local_img_path = models.CharField(max_length=255, null=True, blank=True)
 
     def __unicode__(self):
         return unicode(unicode(self.season) + "E%02d" % (self.number, ))
