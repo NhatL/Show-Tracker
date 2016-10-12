@@ -14,6 +14,10 @@ class Show(models.Model):
     episode_count = models.IntegerField(null=True, blank=True, default=1)
     last_updated = models.DateField(null=True, blank=True)
     first_air = models.DateField(null=True, blank=True)
+    vote_average = models.CharField(max_length=30, null=True, blank=True)
+    vote_count = models.CharField(max_length=30, null=True, blank=True)
+    server_img_path = models.CharField(max_length=255, null=True, blank=True)
+    local_img_path = models.CharField(max_length=255, null=True, blank=True)
 
     def __unicode__(self):
         return unicode(self.name)
