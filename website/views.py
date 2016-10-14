@@ -15,12 +15,42 @@ import datetime
 
 def index(request):
     print "index"
-    return render(request, "website/index.html")
+
+    args = {
+        'site_title': 'Homepage',
+    }
+    return render(request, "website/index.html", args)
+
+
+def others(request, etc):
+    return redirect(reverse('main-view'))
 
 
 def popular(request):
-    print "popular"
-    return render(request, "website/index.html")
+    genres = Genre.objects.order_by('name')
+
+    args = {
+        'site_title': 'Popular shows',
+        'genres': [],
+    }
+
+    for genre in genres:
+        args['genres'].append({
+            'name': genre.name,
+            'shows': [{
+                'name': d.name,
+                'popularity': d.popularity,
+                'vote_average': d.vote_average,
+                'vote_count': d.vote_count,
+                'episode_count': d.episode_count,
+                'ongoing': d.ongoing,
+                'description': d.description,
+            } for d in genre.show.extra(
+                select={'total': '1.0 * vote_average * vote_count / popularity'},
+                order_by=['-total'],
+            )[:10]]
+        })
+    return render(request, "website/popular.html", args)
 
 
 def show_details(request, id):
@@ -32,6 +62,7 @@ def show_details(request, id):
         pass
 
     args = {
+        'site_title': show.name,
         'name': show.name,
         'popularity': show.popularity,
         'description': show.description,
@@ -44,6 +75,7 @@ def show_details(request, id):
     }
     if request.user.is_authenticated():
         args['has_show'] = show in request.user.show_set.all()
+
     for season in show.season_set.all().order_by('number'):
         season_info = {
             'number': season.number,
@@ -65,6 +97,7 @@ def show_details(request, id):
 
 def browse(request):
     args = {
+        'site_title': "Browse",
         'genres': Genre.objects.values_list('name', flat=True),
         'genre': request.GET.get('genre', 'any'),
         'status': request.GET.get('status', 'any'),
@@ -117,18 +150,49 @@ def my_shows(request):
     if not request.user.is_authenticated():
         return redirect(reverse('login-view'))
 
-    args = {}
+    args = {
+        'site_title': "My shows",
+    }
 
+    now = datetime.datetime.now().date()
     all_shows = []
     for show in request.user.show_set.all():
-        # for season in show.season_set.all():
-        #     for episode in season.episode_set.all():
-        #         if episode.air_date
-        last_episode = []
-        next_episode = []
+        episodes_before = []
+        episodes_after = []
+        for season in show.season_set.all():
+            for episode in season.episode_set.all():
+                if episode.air_date < now:
+                    episodes_before.append(episode)
+                else:
+                    episodes_after.append(episode)
+        episodes_before.sort(key=lambda x: x.air_date, reverse=True)
+        episodes_after.sort(key=lambda x: x.air_date, reverse=False)
+
+        if len(episodes_before) < 1:
+            last_episode = {
+                'name': '-',
+            }
+        else:
+            last_episode = {
+                'name': episodes_before[0].__unicode__,
+                'date': datetime.datetime.strftime(episodes_before[0].air_date, "%b %d, %Y"),
+            }
+
+        if len(episodes_after) < 1:
+            next_episode = {
+                'name': '-',
+            }
+        else:
+            next_episode = {
+                'name': episodes_after[0].__unicode__,
+                'date': datetime.datetime.strftime(episodes_after[0].air_date, "%b %d, %Y"),
+            }
+
         all_shows.append({
             'name': show.name,
             'id': show.movie_db_id,
+            'last': last_episode,
+            'next': next_episode,
         })
 
     args['shows'] = all_shows
@@ -139,7 +203,6 @@ def my_shows_remove(request, id):
     if not request.user.is_authenticated():
         return redirect(reverse('login-view'))
 
-    args = {}
     try:
         show = Show.objects.get(movie_db_id=id)
     except:
@@ -159,7 +222,6 @@ def my_shows_add(request, id):
     if not request.user.is_authenticated():
         return redirect(reverse('login-view'))
 
-    args = {}
     try:
         show = Show.objects.get(movie_db_id=id)
     except:
@@ -178,14 +240,21 @@ def login_user(request):
     if request.user.is_authenticated():
         return redirect(reverse('main-view'))
 
+    args = {
+        'site_title': "Login",
+    }
+
     if request.POST:
         email = request.POST['email']
         password = request.POST['password']
 
+        args['email'] = email
+        args['password'] = password
         try:
             validate_email(email)
         except:
-            return render(request, "website/login.html", {'error': "Bad email.", 'email': email, 'password': password})
+            args['error'] = "Bad email."
+            return render(request, "website/login.html", args)
         else:
             pass
 
@@ -193,7 +262,8 @@ def login_user(request):
         if len(wanted_user) > 1:
             return redirect(reverse('login-view'))
         if len(wanted_user) < 1:
-            return render(request, "website/login.html", {'error': "Email doesn't exist.", 'email': email, 'password': password})
+            args['error'] = "Email doesn't exist."
+            return render(request, "website/login.html", args)
 
         wanted_user = wanted_user[0]
         user = authenticate(username=wanted_user.username, password=password)
@@ -202,13 +272,18 @@ def login_user(request):
                 login(request, user)
                 return redirect(reverse('main-view'))
         else:
-            return render(request, "website/login.html", {'error': "Wrong password.", 'email': email, 'password': password})
-    return render(request, "website/login.html")
+            args['error'] = 'Wrong password.'
+            return render(request, "website/login.html", args)
+    return render(request, "website/login.html", args)
 
 
 def signup(request):
     if request.user.is_authenticated():
         return redirect(reverse('main-view'))
+
+    args = {
+        'site_title': "Signup",
+    }
 
     if request.POST:
         first_name = request.POST['first_name']
@@ -217,40 +292,28 @@ def signup(request):
         password = request.POST['password']
         password_confirm = request.POST['password_confirm']
 
+        args['first_name'] = first_name
+        args['last_name'] = last_name
+        args['email'] = email
+        args['password'] = password
+        args['password_confirm'] = password_confirm
+
         if password != password_confirm:
-            return render(request, "website/signup.html", {
-                'error': "Passwords doesn't match.",
-                'first_name': first_name,
-                'last_name': last_name,
-                'email': email,
-                'password': password,
-                'password_confirm': password_confirm
-            })
+            args['error'] = "Passwords doesn't match."
+            return render(request, "website/signup.html", args)
 
         try:
             validate_email(email)
         except:
-            return render(request, "website/signup.html", {
-                'error': "Bad email.",
-                'first_name': first_name,
-                'last_name': last_name,
-                'email': email,
-                'password': password,
-                'password_confirm': password_confirm
-            })
+            args['error'] = "Bad email."
+            return render(request, "website/signup.html", args)
         else:
             pass
 
         checked_users = User.objects.filter(email=email)
         if len(checked_users) > 0:
-            return render(request, "website/signup.html", {
-                'error': "Email already exists.",
-                'first_name': first_name,
-                'last_name': last_name,
-                'email': email,
-                'password': password,
-                'password_confirm': password_confirm
-            })
+            args['error'] = "Email already exists."
+            return render(request, "website/signup.html", args)
 
         user = User.objects.create_user(email, email, password)
         user.first_name = first_name
@@ -262,7 +325,7 @@ def signup(request):
             login(request, user)
             return redirect(reverse('main-view'))
 
-    return render(request, "website/signup.html")
+    return render(request, "website/signup.html", args)
 
 
 def profile(request):
@@ -272,6 +335,7 @@ def profile(request):
     user = request.user
 
     args = {
+        'site_title': "Profile of " + user.first_name,
         'first_name': user.first_name,
         'last_name': user.last_name,
         'email': user.email,
@@ -334,7 +398,9 @@ def reset(request):
     if request.user.is_authenticated():
         return redirect(reverse('main-view'))
 
-    args = {}
+    args = {
+        'site_title': 'Reset Password',
+    }
 
     if request.POST:
         email = request.POST['email']

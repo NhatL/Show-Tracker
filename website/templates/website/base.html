@@ -5,7 +5,7 @@
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{% if title %}{{ title }}{% else %}{% endif %}</title>
+        <title>{% if site_title %}{{ site_title }}{% else %}{% endif %}</title>
 
         <link rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}" type="text/css" />
         <link rel="stylesheet" href="{% static 'css/jquery-ui.structure.css' %}" type="text/css" />
@@ -32,7 +32,7 @@
             <nav id="sidebar-wrapper">
                 <ul class="sidebar-nav">
                     <li class="sidebar-brand">
-                        <a>Show Tracker</a>
+                        <a href="{% url 'main-view' %}">Show Tracker</a>
                     </li>
                     <li>
                         <div id="search-shows">

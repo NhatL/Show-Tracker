@@ -14,9 +14,9 @@
                 </br>
                 {% if user.is_authenticated %}
                     {% if has_show %}
-                        <input type="button" onclick="location.href='{% url 'my-shows-remove-view' id %}';" value="Remove from my shows" />
+                        <input type="button" class="btn btn-primary" onclick="location.href='{% url 'my-shows-remove-view' id %}';" value="Remove from my shows" />
                     {% else %}
-                        <input type="button" onclick="location.href='{% url 'my-shows-add-view' id %}';" value="Add to my shows" />
+                        <input type="button" class="btn btn-primary" onclick="location.href='{% url 'my-shows-add-view' id %}';" value="Add to my shows" />
                     {% endif %}
                 {% endif %}
             </div>

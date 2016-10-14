@@ -32,16 +32,18 @@
                     {% for show in shows %}
                         <tr>
                             <td>
-                                {{ show.name }}
+                                <h4><a href="{% url 'shows-view' show.id %}">{{ show.name }}</a></h4>
                             </td>
                             <td>
-                                {{ show.last }}
+                                {{ show.last.name }} </br>
+                                {{ show.last.date }}
                             </td>
                             <td>
-                                {{ show.next }}
+                                {{ show.next.name }} </br>
+                                {{ show.next.date }}
                             </td>
-                            <td>
-                                <input type="button" onclick="location.href='{% url 'my-shows-remove-view' show.id %}';" value="Remove" />
+                            <td align="center">
+                                <input type="button" class="btn btn-primary" onclick="location.href='{% url 'my-shows-remove-view' show.id %}';" value="Remove" />
                             </td>
                         </tr>
                     {% endfor %}
