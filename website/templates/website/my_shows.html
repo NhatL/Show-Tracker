@@ -1,2 +1,85 @@
 {% extends 'website/base.html' %}
 {% load static %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-1"></div>
+            <div class="col-lg-10"><h1>My Shows</h1></div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-1"></div>
+            <div class="col-lg-10">
+                <table class="table table-responsive table-hover table-striped" id="show-info" width="100%">
+                    <thead>
+                        <tr>
+                            <td width="30%">
+                                Show
+                            </td>
+                            <td width="30%">
+                                Last episode
+                            </td>
+                            <td width="30%">
+                                Next episode
+                            </td>
+                            <td width="10%" align="center">
+                                Remove show
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for show in shows %}
+                        <tr>
+                            <td>
+                                {{ show.name }}
+                            </td>
+                            <td>
+                                {{ show.last }}
+                            </td>
+                            <td>
+                                {{ show.next }}
+                            </td>
+                            <td>
+                                <input type="button" onclick="location.href='{% url 'my-shows-remove-view' show.id %}';" value="Remove" />
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block extra_css %}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" type="text/css" />
+{% endblock %}
+
+
+{% block extrascripts %}
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+
+    <script>
+    $(document).ready(function(){
+        $('#show-info').DataTable({
+            "order": [[ 0, "asc" ]],
+            "responsive": true,
+            "columnDefs": [
+                    {
+                    "targets": 3,
+                    "orderable": false
+                }
+            ],
+            "language": {
+                "emptyTable": "No shows found. Add some shows here!",
+                "lengthMenu": "Display _MENU_ shows per page.",
+                "info": "Showing page _PAGE_ of _PAGES_",
+                "zeroRecords": "No shows found."
+            },
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ]
+        });
+    });
+    </script>
+{% endblock %}

@@ -2,13 +2,14 @@ from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
-from django.forms.models import model_to_dict
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.http import HttpResponseForbidden
+from django.core.exceptions import PermissionDenied
 
 from shows.models import Show, Genre
 
@@ -26,38 +27,41 @@ def popular(request):
 
 
 def show_details(request, id):
-    print "show_details: " + str(id)
     try:
         show = Show.objects.get(movie_db_id=id)
     except ObjectDoesNotExist:
         return redirect(reverse('browse-view'))
     else:
-        args = {
-            'name': show.name,
-            'popularity': show.popularity,
-            'description': show.description,
-            'ongoing': show.ongoing,
-            'episode_count': show.episode_count,
-            'vote_average': show.vote_average,
-            'vote_count': show.vote_count,
-            'seasons': [],
+        pass
+
+    args = {
+        'name': show.name,
+        'popularity': show.popularity,
+        'description': show.description,
+        'ongoing': show.ongoing,
+        'episode_count': show.episode_count,
+        'vote_average': show.vote_average,
+        'vote_count': show.vote_count,
+        'seasons': [],
+        'id': id,
+    }
+    if request.user.is_authenticated():
+        args['has_show'] = show in request.user.show_set.all()
+    for season in show.season_set.all().order_by('number'):
+        season_info = {
+            'number': season.number,
         }
-        for season in show.season_set.all().order_by('number'):
-            season_info = {
-                'number': season.number,
+        episode_info = []
+        for episode in season.episode_set.all():
+            episode_detail = {
+                'title': episode.title,
+                'air_date': datetime.datetime.strftime(episode.air_date, "%b %d, %Y"),
+                'description': episode.description,
+                'number': "%02dx%02d" % (season.number, episode.number),
             }
-            episode_info = []
-            for episode in season.episode_set.all():
-                episode_detail = {
-                    'title': episode.title,
-                    'air_date': datetime.datetime.strftime(episode.air_date, "%b %d, %Y"),
-                    'description': episode.description,
-                    'number': "%02dx%02d" % (season.number, episode.number),
-                }
-                episode_info.append(episode_detail)
-            season_info['episodes'] = episode_info
-            args['seasons'].append(season_info)
-    print args
+            episode_info.append(episode_detail)
+        season_info['episodes'] = episode_info
+        args['seasons'].append(season_info)
 
     return render(request, "website/show_details.html", args)
 
@@ -113,9 +117,59 @@ def unwatched(request):
 
 
 def my_shows(request):
-    print "mine"
-    print request.user.show_set.all()
-    return render(request, "website/my_shows.html")
+    if not request.user.is_authenticated():
+        return redirect(reverse('login-view'))
+
+    args = {}
+
+    all_shows = []
+    for show in request.user.show_set.all():
+        all_shows.append({
+            'name': show.name,
+            'id': show.movie_db_id,
+        })
+
+    args['shows'] = all_shows
+    return render(request, "website/my_shows.html", args)
+
+
+def my_shows_remove(request, id):
+    if not request.user.is_authenticated():
+        return redirect(reverse('login-view'))
+
+    args = {}
+    try:
+        show = Show.objects.get(movie_db_id=id)
+    except:
+        return redirect(reverse('my-shows-view'))
+    else:
+        pass
+
+    if show not in request.user.show_set.all():
+        return redirect(reverse('my-shows-view'))
+
+    request.user.show_set.remove(show)
+
+    return redirect(reverse('my-shows-view'))
+
+
+def my_shows_add(request, id):
+    if not request.user.is_authenticated():
+        return redirect(reverse('login-view'))
+
+    args = {}
+    try:
+        show = Show.objects.get(movie_db_id=id)
+    except:
+        return redirect(reverse('my-shows-view'))
+    else:
+        pass
+
+    if show in request.user.show_set.all():
+        return redirect(reverse('my-shows-view'))
+    request.user.show_set.add(show)
+
+    return redirect(reverse('my-shows-view'))
 
 
 def login_user(request):
@@ -212,8 +266,6 @@ def signup(request):
 def profile(request):
     if not request.user.is_authenticated():
         return redirect(reverse('login-view'))
-
-    args = {}
 
     user = request.user
 
