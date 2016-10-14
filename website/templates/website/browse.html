@@ -2,7 +2,8 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/browse.css' %}" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" type="text/css" />
+
 {% endblock %}
 
 {% block content %}
@@ -90,7 +91,8 @@
                             </tr>
                         </thead>
                     </table>
-                    <table class="table table-striped table-hover table-responsive">
+
+                    <table class="table table-striped table-hover table-responsive" id="show-list">
                         <thead style="font-weight: bold;">
                             <tr>
                                 <td align="left" width="10%">
@@ -159,11 +161,33 @@
 {% endblock %}
 
 {% block extrascripts %}
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+
     <script>
-        $(document).ready(function(){
+        $(document).ready(function() {
             $('#genre').val('{{ genre }}');
             $("input[type=radio][value='{{ status }}']").prop("checked", true);
             $("input[type=radio][value='{{ showAge }}']").prop("checked", true);
+
+            $('#show-list').DataTable({
+                "order": [[1, "desc"]],
+                "responsive": true,
+                "columnDefs": [
+                    {
+                        "targets": 3,
+                        "orderable": false
+                    }
+                ],
+                "language": {
+                    "emptyTable": "No shows found in database.",
+                    "lengthMenu": "Display _MENU_ shows per page.",
+                    "info": "",
+                    "zeroRecords": "No shows found."
+                },
+                "bPaginate": false,
+                "bFilter": false,
+                "lengthMenu": [[-1], ["All"]]
+            });
         });
     </script>
 {% endblock %}

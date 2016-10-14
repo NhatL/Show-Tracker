@@ -25,9 +25,9 @@ class Command(BaseCommand):
                 new_show.popularity = "%0.2f" % (show.get('popularity', 1), )
                 new_show.vote_average = "%0.2f" % (show.get('vote_average', 1), )
                 new_show.vote_count = show.get('vote_count', 1)
-                new_show.first_air = show.get('first_air_date', datetime.datetime.now().strftime("%Y-%m-%d"))
+                new_show.first_air = show.get('first_air_date', datetime.datetime(1970, 1, 1, 0, 0, 0).strftime("%Y-%m-%d"))
                 if new_show.first_air == '':
-                    new_show.first_air = datetime.datetime.now().strftime("%Y-%m-%d")
+                    new_show.first_air = datetime.datetime(1970, 1, 1, 0, 0, 0).strftime("%Y-%m-%d")
                 new_show.first_air = datetime.datetime.strptime(new_show.first_air, "%Y-%m-%d")
                 new_show.last_updated = datetime.datetime.now().strftime("%Y-%m-%d")
                 new_show.server_img_path = show.get('poster_path', '')
@@ -55,8 +55,8 @@ class Command(BaseCommand):
                         new_episode.description = episode['overview']
                         new_episode.title = episode['name']
                         if episode['air_date'] is None or episode['air_date'] == '':
-                            episode['air_date'] = datetime.datetime.now().strftime("%Y-%m-%d")
-                        new_episode.air_date = datetime.datetime.strptime(episode.get('air_date', datetime.datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d")
+                            episode['air_date'] = datetime.datetime(1970, 1, 1, 0, 0, 0).strftime("%Y-%m-%d")
+                        new_episode.air_date = datetime.datetime.strptime(episode.get('air_date', datetime.datetime(1970, 1, 1, 0, 0, 0).strftime("%Y-%m-%d")), "%Y-%m-%d")
                         new_episode.server_img_path = episode.get('still_path', '')
                         new_episode.save()
                         episode_count += 1

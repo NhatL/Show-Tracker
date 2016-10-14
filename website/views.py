@@ -7,9 +7,6 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
-from django.http import HttpResponseForbidden
-from django.core.exceptions import PermissionDenied
 
 from shows.models import Show, Genre
 
@@ -124,6 +121,11 @@ def my_shows(request):
 
     all_shows = []
     for show in request.user.show_set.all():
+        # for season in show.season_set.all():
+        #     for episode in season.episode_set.all():
+        #         if episode.air_date
+        last_episode = []
+        next_episode = []
         all_shows.append({
             'name': show.name,
             'id': show.movie_db_id,
