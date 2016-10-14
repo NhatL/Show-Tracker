@@ -14,6 +14,7 @@
                 {% if email %}value="{{ email }}"{% endif %}/><br>
 
                 {% if error %}<h5 style="color:red;">{{ error }}</h5>{% endif %}
+                {% if success %}<h5 style="color:green;">{{ success }}</h5>{% endif %}
                 <br>
                 <button class="btn btn-sm btn-primary btn-block"  name="Submit" value="Reset" type="Submit">Reset</button>
             </form>
@@ -24,8 +25,4 @@
         </div>
         <div class="col-lg-4"></div>
     </div>
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/reset.css' %}" type="text/css" />
 {% endblock %}

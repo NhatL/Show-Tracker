@@ -10,6 +10,14 @@
             <form action="{% url 'signup-view' %}" method="post" name="Signup_Form" class="form-signup pure-form">
                 {% csrf_token %}
 
+                <label for="first_name">First Name:</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required="" autofocus=""
+                {% if name %}value="{{ name }}"{% endif %}/><br>
+
+                <label for="last_name">Last Name:</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required="" autofocus=""
+                {% if name %}value="{{ name }}"{% endif %}/><br>
+
                 <label for="email">Email:</label>
                 <input type="text" class="form-control" id="email" name="email" placeholder="Email" required="" autofocus=""
                 {% if email %}value="{{ email }}"{% endif %}/><br>
@@ -32,8 +40,4 @@
         </div>
         <div class="col-lg-4"></div>
     </div>
-{% endblock %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/signup.css' %}" type="text/css" />
 {% endblock %}

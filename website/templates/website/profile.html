@@ -1,2 +1,56 @@
 {% extends 'website/base.html' %}
 {% load static %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-5"></div>
+        <div class="col-lg-2">
+            <h1 align="center">Welcome {{ first_name }}</h1><br>
+            <hr class="colorgraph"><br>
+            <form action="{% url 'profile-view' %}" method="post" name="Profile_Form" class="form-signup pure-form">
+                {% csrf_token %}
+
+                <label for="first_name">First Name:</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required="" autofocus=""
+                {% if first_name %}value="{{ first_name }}"{% endif %}/><br>
+
+                <label for="last_name">Last Name:</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required="" autofocus=""
+                {% if last_name %}value="{{ last_name }}"{% endif %}/><br>
+
+                <label for="email">Email:</label>
+                <input type="text" class="form-control" id="email" name="email" placeholder="Email" required="" autofocus=""
+                {% if email %}value="{{ email }}"{% endif %}/><br>
+
+                <label for="password">Current Password:</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required
+                {% if password %}value="{{ password }}"{% endif %}/><br>
+
+                <label for="new_password">New Password:</label>
+                <input type="password" class="form-control" id="new_password" name="new_password" placeholder="New Password"
+                {% if new_password %}value="{{ new_password }}"{% endif %}/>
+
+                <label for="password_confirm">Password Confirmation:</label>
+                <input type="password" class="form-control" id="password_confirm" name="password_confirm" placeholder="Confirm Password"
+                {% if password_confirm %}value="{{ password_confirm }}"{% endif %}/>
+
+                {% if error %}<h5 style="color:red;">{{ error }}</h5>{% endif %}
+                {% if success %}<h5 style="color:green;">{{ success }}</h5>{% endif %}
+                <br>
+
+                <button class="btn btn-sm btn-primary btn-block"  name="Submit" value="Submit" type="Submit">Save</button>
+            </form>
+        </div>
+        <div class="col-lg-4"></div>
+    </div>
+{% endblock %}
+
+{% block extrascripts %}
+    <script>
+    $("form-signup").bind("keypress", function (e) {
+        if (e.which == 13) {
+            $("#form-signup").submit();
+        }
+    });
+</script>
+{% endblock %}

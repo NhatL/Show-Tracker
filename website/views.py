@@ -119,8 +119,6 @@ def my_shows(request):
 
 
 def login_user(request):
-    print "login"
-
     if request.user.is_authenticated():
         return redirect(reverse('main-view'))
 
@@ -153,11 +151,12 @@ def login_user(request):
 
 
 def signup(request):
-    print "signup"
     if request.user.is_authenticated():
         return redirect(reverse('main-view'))
 
     if request.POST:
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
         email = request.POST['email']
         password = request.POST['password']
         password_confirm = request.POST['password_confirm']
@@ -165,6 +164,8 @@ def signup(request):
         if password != password_confirm:
             return render(request, "website/signup.html", {
                 'error': "Passwords doesn't match.",
+                'first_name': first_name,
+                'last_name': last_name,
                 'email': email,
                 'password': password,
                 'password_confirm': password_confirm
@@ -175,6 +176,8 @@ def signup(request):
         except:
             return render(request, "website/signup.html", {
                 'error': "Bad email.",
+                'first_name': first_name,
+                'last_name': last_name,
                 'email': email,
                 'password': password,
                 'password_confirm': password_confirm
@@ -186,12 +189,16 @@ def signup(request):
         if len(checked_users) > 0:
             return render(request, "website/signup.html", {
                 'error': "Email already exists.",
+                'first_name': first_name,
+                'last_name': last_name,
                 'email': email,
                 'password': password,
                 'password_confirm': password_confirm
             })
 
         user = User.objects.create_user(email, email, password)
+        user.first_name = first_name
+        user.last_name = last_name
         user.save()
 
         user = authenticate(username=email, password=password)
@@ -203,10 +210,88 @@ def signup(request):
 
 
 def profile(request):
-    print "profile"
-    return render(request, "website/index.html")
+    if not request.user.is_authenticated():
+        return redirect(reverse('login-view'))
+
+    args = {}
+
+    user = request.user
+
+    args = {
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email': user.email,
+    }
+
+    if request.POST:
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        email = request.POST['email']
+        password = request.POST['password']
+        new_password = request.POST['new_password']
+        password_confirm = request.POST['password_confirm']
+
+        if new_password != '' and new_password != password_confirm:
+            args['error'] = "Passwords doesn't match."
+            args['password'] = password
+            args['new_password'] = new_password
+            args['password_confirm'] = password_confirm
+            return render(request, "website/profile.html", args)
+
+        try:
+            validate_email(email)
+        except:
+            args['error'] = "Bad email."
+            args['password'] = password
+            args['new_password'] = new_password
+            args['password_confirm'] = password_confirm
+            return render(request, "website/profile.html", args)
+        else:
+            pass
+
+        checked_users = User.objects.filter(email=email)
+        if len(checked_users) > 0 and request.user.id != checked_users[0].id:
+            args['error'] = "Email already exists."
+            args['password'] = password
+            return render(request, "website/profile.html", args)
+
+        if not user.check_password(password):
+            args['error'] = "Wrong password."
+            args['first_name'] = first_name
+            args['last_name'] = last_name
+            args['email'] = email
+            args['password'] = password
+            args['new_password'] = new_password
+            args['password_confirm'] = password_confirm
+            return render(request, "website/profile.html", args)
+
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.username = email if not user.is_superuser else user.username
+        user.set_password(new_password)
+        user.save()
+        return redirect(reverse('login-view'))
+
+    return render(request, "website/profile.html", args)
 
 
 def reset(request):
-    print "reset"
-    return render(request, "website/reset.html")
+    if request.user.is_authenticated():
+        return redirect(reverse('main-view'))
+
+    args = {}
+
+    if request.POST:
+        email = request.POST['email']
+
+        users = User.objects.filter(email=email)
+
+        if len(users) == 0:
+            args['error'] = "Email doesn't exist."
+            args['email'] = email
+            return render(request, "website/reset.html", args)
+
+        args['success'] = 'Email has been reseted. Check your email for further instructions.'
+
+    return render(request, "website/reset.html", args)

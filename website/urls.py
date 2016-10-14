@@ -14,6 +14,6 @@ urlpatterns = [
     url(r'^user/reset/', views.reset, name="reset-view"),
     url(r'^user/sign_up/', views.signup, name="signup-view"),
     url(r'^user/profile/', views.profile, name="profile-view"),
-    url(r'^user/logout/', logout, {'next_page': '/'}),
+    url(r'^user/logout/', logout, {'next_page': '/'}, name="logout-view"),
     url(r'^$', views.index, name="main-view"),
 ]

@@ -96,7 +96,7 @@
             e.preventDefault();
             $("#search-form").submit();
         })
-        $(document).keypress(function (e) {
+        $("search-form").bind("keypress", function (e) {
             if (e.which == 13) {
                 $("#search-form").submit();
             }
