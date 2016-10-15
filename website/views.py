@@ -45,6 +45,7 @@ def popular(request):
                 'episode_count': d.episode_count,
                 'ongoing': d.ongoing,
                 'description': d.description,
+                'id': d.movie_db_id,
             } for d in genre.show.extra(
                 select={'total': '1.0 * vote_average * vote_count / popularity'},
                 order_by=['-total'],
