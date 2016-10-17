@@ -1,0 +1,142 @@
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-1"></div>
+            <div class="col-lg-10"><h1>Unwatched Shows</h1></div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-1"></div>
+            <div class="col-lg-10">
+                <table class="table table-responsive table-hover table-striped" id="show-info" width="100%">
+                    <thead>
+                        <tr>
+                            <td width="30%">
+                                Episode
+                            </td>
+                            <td width="30%">
+                                Title
+                            </td>
+                            <td width="30%">
+                                Air Date
+                            </td>
+                            <td width="10%">
+                                Watched
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for episode in episodes %}
+                        <tr>
+                            <td>
+                                <h5><a href="{% url 'shows-view' episode.show_id %}">{{ episode.unicode }}</a></h5>
+                            </td>
+                            <td>
+                                {{ episode.title }}
+                            </td>
+                            <td>
+                                {{ episode.air_date }}
+                            </td>
+                            <td align="center">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="ep{{ episode.episode_id }}" value="ep{{ episode.episode_id }}">
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block extra_css %}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" type="text/css" />
+{% endblock %}
+
+
+{% block extrascripts %}
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+
+    <script>
+    $(document).ready(function(){
+        var mainTable = $('#show-info').DataTable({
+            "order": [[ 0, "asc" ]],
+            "responsive": true,
+            "columnDefs": [
+                    {
+                    "targets": 3,
+                    "orderable": false
+                }
+            ],
+            "language": {
+                "emptyTable": "No shows found. Add some shows <a href='{% url 'browse-view' %}'>here</a>!",
+                "lengthMenu": "Display _MENU_ shows per page.",
+                "info": "Showing page _PAGE_ of _PAGES_",
+                "infoEmpty": "Showing 0 to 0 of 0 shows",
+                "infoFiltered": "(filtered from _MAX_ total shows)",
+                "zeroRecords": "No shows found."
+            },
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ]
+        });
+
+        $.ajaxSetup({
+             beforeSend: function(xhr, settings) {
+                 function getCookie(name) {
+                     var cookieValue = null;
+                     if (document.cookie && document.cookie != '') {
+                         var cookies = document.cookie.split(';');
+                         for (var i = 0; i < cookies.length; i++) {
+                             var cookie = jQuery.trim(cookies[i]);
+                             // Does this cookie string begin with the name we want?
+                             if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                 break;
+                             }
+                         }
+                     }
+                     return cookieValue;
+                 }
+                 if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                     // Only send the token to relative URLs i.e. locally.
+                     xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                 }
+             }
+        });
+
+        $('input[type=checkbox]').change(function () {
+            if (this.value.indexOf('ep') != -1) {
+                var checkbox = this.value.replace('ep', '');
+                var check = $(this).prop("checked");
+                $.ajax({
+                    url: "{% url 'my-shows-watch-view' %}",
+                    type: 'POST',
+                    async: false,
+                    cache: false,
+                    data: {
+                        'id': checkbox,
+                        'new_value': check
+                    },
+                    timeout: 30000,
+                    error: function(){
+                        return;
+                    },
+                    success: function(msg){
+                        mainTable.row( $('#ep' + checkbox).parents('tr') ).remove();
+                        mainTable.draw();
+                        return;
+                    }
+                });
+            }
+            console.log(this.value);
+        });
+    });
+    </script>
+{% endblock %}

@@ -7,10 +7,11 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
+from django.http import HttpResponse
 
-from shows.models import Show, Genre
+from shows.models import Show, Genre, Episode
 
-import datetime
+import datetime, ast
 
 
 def index(request):
@@ -75,7 +76,7 @@ def show_details(request, id):
     if request.user.is_authenticated():
         args['has_show'] = show in request.user.show_set.all()
 
-    for season in show.season_set.all().order_by('number'):
+    for season in show.season_set.order_by('number'):
         season_info = {
             'number': season.number,
         }
@@ -86,6 +87,8 @@ def show_details(request, id):
                 'air_date': datetime.datetime.strftime(episode.air_date, "%b %d, %Y"),
                 'description': episode.description,
                 'number': "%02dx%02d" % (season.number, episode.number),
+                'watched': episode in request.user.userprofile.watched_episodes.all(),
+                'id': episode.movie_db_id,
             }
             episode_info.append(episode_detail)
         season_info['episodes'] = episode_info
@@ -141,8 +144,38 @@ def browse(request):
 
 
 def unwatched(request):
-    print "Unwatched"
-    return render(request, "website/index.html")
+    if not request.user.is_authenticated():
+        return redirect(reverse('login-view'))
+
+    args = {
+        'site_title': "Unwatched shows",
+        'show': [],
+    }
+    watched_episodes = request.user.userprofile.watched_episodes.all()
+    episodes = []
+    shows = []
+
+    for show in request.user.show_set.all():
+        for season in show.season_set.all():
+            for episode in season.episode_set.all():
+                episodes.append(episode)
+
+    for episode in episodes:
+        if episode not in watched_episodes:
+            episode_info = {
+                'number': episode.number,
+                'title': episode.title,
+                'air_date': episode.air_date,
+                'description': episode.description,
+                'episode_id': episode.movie_db_id,
+                'unicode': episode.__unicode__(),
+                'show_id': episode.season.show.movie_db_id,
+            }
+            shows.append(episode_info)
+
+    args['episodes'] = shows
+    print args
+    return render(request, "website/unwatched.html", args)
 
 
 def my_shows(request):
@@ -212,6 +245,10 @@ def my_shows_remove(request, id):
     if show not in request.user.show_set.all():
         return redirect(reverse('my-shows-view'))
 
+    for episode in request.user.userprofile.watched_episodes.all():
+        if episode.season.show == show:
+            request.user.userprofile.watched_episodes.remove(episode)
+
     request.user.show_set.remove(show)
 
     return redirect(reverse('my-shows-view'))
@@ -235,6 +272,50 @@ def my_shows_add(request, id):
     return redirect(reverse('my-shows-view'))
 
 
+def my_show_episode(request):
+    if not request.user.is_authenticated():
+        return redirect(reverse('login-view'))
+
+    if request.method == "POST":
+        if 'id' in request.POST and 'new_value' in request.POST:
+            episode_id = request.POST['id']
+            new_value = request.POST['new_value'].upper()
+
+            try:
+                episode_id = int(episode_id)
+                if new_value == "TRUE":
+                    new_value = True
+                elif new_value == "FALSE":
+                    new_value = False
+                else:
+                    raise Exception
+                episode = Episode.objects.get(movie_db_id=episode_id)
+
+                if request.user not in episode.season.show.users.all():
+                    raise Exception
+
+                user_watched = request.user.userprofile.watched_episodes.all()
+
+                if episode in user_watched and not new_value:
+                    # Episode is watched and now it is marked as Unwatched -> do it
+                    request.user.userprofile.watched_episodes.remove(episode)
+                elif episode not in user_watched and new_value:
+                    # Episode is unwatched and now it is marked as Watched -> do it
+                    request.user.userprofile.watched_episodes.add(episode)
+                else:
+                    raise Exception
+            except:
+                return redirect(reverse('main-view'))
+            else:
+                pass
+        else:
+            return redirect(reverse('main-view'))
+    else:
+        return redirect(reverse('main-view'))
+
+    return HttpResponse('<h1>Page was found</h1>', status=200)
+
+
 def login_user(request):
     if request.user.is_authenticated():
         return redirect(reverse('main-view'))
@@ -243,9 +324,15 @@ def login_user(request):
         'site_title': "Login",
     }
 
-    if request.POST:
-        email = request.POST['email']
-        password = request.POST['password']
+    if request.method == "POST":
+        try:
+            email = request.POST['email']
+            password = request.POST['password']
+        except:
+            args['error'] = "No email & password specified."
+            return render(request, "website/login.html", args)
+        else:
+            pass
 
         args['email'] = email
         args['password'] = password

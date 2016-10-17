@@ -1,10 +1,6 @@
 {% extends 'website/base.html' %}
 {% load static %}
 
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/browse.css' %}" type="text/css" />
-{% endblock %}
-
 {% block content %}
     <div class="container-fluid">
         <div class="row">
@@ -87,15 +83,20 @@
                                         <td width="3%" align="center">
                                             Episode
                                         </td>
-                                        <td width="10%" align="center">
+                                        <td width="15%" align="center">
                                             Title
                                         </td>
-                                        <td width="5%" align="center">
+                                        <td width="7%" align="center">
                                             Air Date
                                         </td>
-                                        <td width="70%" align="center">
+                                        <td width="60%" align="center">
                                             Description
                                         </td>
+                                        {% if user.is_authenticated %}
+                                        <td width="5%" align="center">
+                                            Watched
+                                        </td>
+                                        {% endif %}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -113,6 +114,19 @@
                                             <td>
                                                 {{ episode.description }}
                                             </td>
+                                            {% if user.is_authenticated %}
+                                            <td width="5%" align="{% if has_show %}center{% else %}left{% endif %}">
+                                                {% if has_show %}
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" id="blankCheckbox" value="ep{{ episode.id }}" {% if episode.watched %}checked{% endif %} style="">
+                                                    </label>
+                                                </div>
+                                                {% else %}
+                                                    Please add to show first
+                                                {% endif %}
+                                            </td>
+                                            {% endif %}
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -130,5 +144,55 @@
         if (window.location.hash) {
             $("a[href='" + window.location.hash + "']").tab('show');
         }
+        $(document).ready(function() {
+            $.ajaxSetup({
+                 beforeSend: function(xhr, settings) {
+                     function getCookie(name) {
+                         var cookieValue = null;
+                         if (document.cookie && document.cookie != '') {
+                             var cookies = document.cookie.split(';');
+                             for (var i = 0; i < cookies.length; i++) {
+                                 var cookie = jQuery.trim(cookies[i]);
+                                 // Does this cookie string begin with the name we want?
+                                 if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                     break;
+                                 }
+                             }
+                         }
+                         return cookieValue;
+                     }
+                     if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                         // Only send the token to relative URLs i.e. locally.
+                         xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                     }
+                 }
+            });
+
+            $('input[type=checkbox]').change(function () {
+                if (this.value.indexOf('ep') != -1) {
+                    var checkbox = this.value.replace('ep', '');
+                    var check = $(this).prop("checked");
+                    $.ajax({
+                        url: "{% url 'my-shows-watch-view' %}",
+                        type: 'POST',
+                        async: false,
+                        cache: false,
+                        data: {
+                            'id': checkbox,
+                            'new_value': check
+                        },
+                        timeout: 30000,
+                        error: function(){
+                            return;
+                        },
+                        success: function(msg){
+                            return;
+                        }
+                    });
+                }
+                console.log(this.value);
+            });
+        })
     </script>
 {% endblock %}

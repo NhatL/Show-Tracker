@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^shows/popular', views.popular, name="popular-view"),
     url(r'^shows/browse', views.browse, name="browse-view"),
     url(r'^shows/unwatched', views.unwatched, name="unwatched-view"),
+    url(r'^shows/my/episode', views.my_show_episode, name="my-shows-watch-view"),
     url(r'^shows/my/remove/(\d+)$', views.my_shows_remove, name="my-shows-remove-view"),
     url(r'^shows/my/add/(\d+)$', views.my_shows_add, name="my-shows-add-view"),
     url(r'^shows/my', views.my_shows, name="my-shows-view"),
