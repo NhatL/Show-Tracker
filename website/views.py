@@ -14,8 +14,6 @@ import datetime
 
 
 def index(request):
-    print "index"
-
     args = {
         'site_title': 'Homepage',
     }
