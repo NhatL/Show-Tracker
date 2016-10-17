@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'shows',
     'website',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -58,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'showtracker.urls'
@@ -133,3 +135,5 @@ STATIC_URL = '/static/'
 STATIC_ROOT = 'static/'
 
 DOWNLOAD_PAGINATOR = 20
+
+INTERNAL_IPS = ['127.0.0.1', ]

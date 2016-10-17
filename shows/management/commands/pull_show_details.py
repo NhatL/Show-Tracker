@@ -15,6 +15,8 @@ class Command(BaseCommand):
             result = discover(page=i)
             for show in result:
                 episode_count = 0
+                if show.get('name', '') is None or show.get('name', '') == '':
+                    continue
                 if isinstance(show['name'], unicode):
                     print show['name'].encode('windows-1252', 'ignore')
                 else:

@@ -20,3 +20,10 @@ urlpatterns = [
     url(r'^', include("website.urls")),
     url(r'^adm/', admin.site.urls),
 ]
+
+try:
+    import debug_toolbar
+except:
+    pass
+else:
+    urlpatterns += [url(r'^__debug__/', include(debug_toolbar.urls)), ]
