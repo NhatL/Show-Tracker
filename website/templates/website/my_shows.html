@@ -17,11 +17,14 @@
                             <td width="30%">
                                 Show
                             </td>
-                            <td width="30%">
+                            <td width="20%">
                                 Last episode
                             </td>
-                            <td width="30%">
+                            <td width="20%">
                                 Next episode
+                            </td>
+                            <td width="20%">
+                                Unwatched Episodes
                             </td>
                             <td width="10%">
 
@@ -41,6 +44,9 @@
                             <td>
                                 {{ show.next.name }} </br>
                                 {{ show.next.date }}
+                            </td>
+                            <td align="center">
+                                <h4>{{ show.not_watched }}</h4>
                             </td>
                             <td align="center">
                                 <input type="button" class="btn btn-primary" onclick="location.href='{% url 'my-shows-remove-view' show.id %}';" value="Remove" />

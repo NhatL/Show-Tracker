@@ -11,6 +11,7 @@
                 {% if user.is_authenticated %}
                     {% if has_show %}
                         <input type="button" class="btn btn-primary" onclick="location.href='{% url 'my-shows-remove-view' id %}';" value="Remove from my shows" />
+                        <input type="button" class="btn btn-primary" onclick="location.href='{% url 'my-shows-mark-all-view' id %}';" value="Mark all as watched" />
                     {% else %}
                         <input type="button" class="btn btn-primary" onclick="location.href='{% url 'my-shows-add-view' id %}';" value="Add to my shows" />
                     {% endif %}
@@ -76,7 +77,18 @@
                 <div class="tab-content">
                     {% for season in seasons %}
                         <div id="season{{ season.number }}" class="tab-pane fade{% if seasons.0 == season %} in active{% endif %}">
-                            <h3>Season {{ season.number }}</h3>
+                            <h3>
+                                <div class="col-lg-4">Season {{ season.number }}</div>
+                                {% if user.is_authenticated %}
+                                    {% if has_show %}
+                                        <div class="col-lg-5"></div>
+                                        <div class="col-lg-3" align="right">
+                                            <input type="button" class="btn btn-primary" onclick="location.href='{% url 'my-shows-mark-season-view' id season.number %}';" value="Mark season as watched" />
+                                            <input type="button" class="btn btn-primary" onclick="location.href='{% url 'my-shows-mark-season-unwatched-view' id season.number %}';" value="Mark season as unwatched" />
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </h3>
                             <table class="table table-responsive table-hover table-striped">
                                 <thead>
                                     <tr style="font-weight:bold;">

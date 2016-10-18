@@ -185,18 +185,23 @@ def my_shows(request):
     args = {
         'site_title': "My shows",
     }
+    all_watched = request.user.userprofile.watched_episodes.all()[:]
 
     now = datetime.datetime.now().date()
     all_shows = []
     for show in request.user.show_set.all():
         episodes_before = []
         episodes_after = []
+        not_watched = 0
         for season in show.season_set.all():
             for episode in season.episode_set.all():
                 if episode.air_date < now:
                     episodes_before.append(episode)
                 else:
                     episodes_after.append(episode)
+
+                if episode in all_watched:
+                    not_watched += 1
         episodes_before.sort(key=lambda x: x.air_date, reverse=True)
         episodes_after.sort(key=lambda x: x.air_date, reverse=False)
 
@@ -225,6 +230,7 @@ def my_shows(request):
             'id': show.movie_db_id,
             'last': last_episode,
             'next': next_episode,
+            'not_watched': not_watched,
         })
 
     args['shows'] = all_shows
@@ -313,7 +319,70 @@ def my_show_episode(request):
     else:
         return redirect(reverse('main-view'))
 
-    return HttpResponse('<h1>Page was found</h1>', status=200)
+
+def my_show_mark_all(request, id):
+    if not request.user.is_authenticated():
+        return redirect(reverse('main-view'))
+
+    try:
+        show = Show.objects.get(movie_db_id=id)
+
+        if show not in request.user.show_set.all():
+            raise Exception
+
+        for season in show.season_set.all():
+            for episode in season.episode_set.all():
+                if episode not in request.user.userprofile.watched_episodes.all():
+                    request.user.userprofile.watched_episodes.add(episode)
+    except:
+        return redirect(reverse('main-view'))
+    else:
+        return redirect(reverse('main-view'))
+
+
+def my_show_mark_season(request, id, season_number):
+    try:
+        if not request.user.is_authenticated():
+            raise Exception
+
+        show = Show.objects.get(movie_db_id=id)
+
+        if show not in request.user.show_set.all():
+            raise Exception
+
+        for season in show.season_set.all():
+            if str(season.number) == str(season_number):
+                for episode in season.episode_set.all():
+                    if episode not in request.user.userprofile.watched_episodes.all():
+                        request.user.userprofile.watched_episodes.add(episode)
+                break
+    except:
+        pass
+
+    return redirect(reverse('main-view'))
+
+
+def my_show_mark_season_unwatched(request, id, season_number):
+    try:
+        if not request.user.is_authenticated():
+            raise Exception
+
+        show = Show.objects.get(movie_db_id=id)
+
+        if show not in request.user.show_set.all():
+            raise Exception
+
+        for season in show.season_set.all():
+            if str(season.number) == str(season_number):
+                for episode in season.episode_set.all():
+                    if episode in request.user.userprofile.watched_episodes.all():
+                        request.user.userprofile.watched_episodes.remove(episode)
+                break
+    except:
+        pass
+
+    return redirect(reverse('main-view'))
+
 
 
 def login_user(request):
