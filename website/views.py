@@ -7,11 +7,10 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
-from django.http import HttpResponse
 
 from shows.models import Show, Genre, Episode
 
-import datetime, ast
+import datetime
 
 
 def index(request):
